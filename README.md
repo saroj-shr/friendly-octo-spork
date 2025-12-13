@@ -96,20 +96,20 @@ docker-compose restart
 The included `scripts/generate-ssl.sh` script creates self-signed certificates for local development. Your browser will show a security warning - this is normal for self-signed certificates.
 
 ### Production (Let's Encrypt)
-For production, use Let's Encrypt with Certbot:
 
-1. Update `server_name` in `nginx/conf.d/wordpress.conf` with your domain
-2. Add Certbot service to `docker-compose.yml`:
-```yaml
-certbot:
-  image: certbot/certbot
-  volumes:
-    - ./ssl:/etc/letsencrypt
-    - ./certbot-www:/var/www/certbot
-  command: certonly --webroot -w /var/www/certbot --email your@email.com -d yourdomain.com --agree-tos
+**For testing (to avoid rate limits):**
+```bash
+chmod +x scripts/setup-letsencrypt.sh scripts/switch-to-letsencrypt.sh
+./scripts/setup-letsencrypt.sh --staging --email your@email.com
 ```
 
-3. Update SSL paths in Nginx config to point to Let's Encrypt certificates
+**For production (real certificates):**
+```bash
+./scripts/setup-letsencrypt.sh --email your@email.com
+./scripts/switch-to-letsencrypt.sh
+```
+
+The setup includes automatic certificate renewal via the certbot container.
 
 ## IPv6-Only VPS Configuration
 
