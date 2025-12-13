@@ -1,0 +1,69 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: wordpress_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wordpress_network
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    container_name: wordpress_site
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      APACHE_SERVER_NAME: localhost
+      # PHP upload limits for 6GB backups
+      PHP_UPLOAD_MAX_FILESIZE: 6G
+      PHP_POST_MAX_SIZE: 6G
+      PHP_MAX_EXECUTION_TIME: 600
+      PHP_MAX_INPUT_TIME: 600
+      PHP_MEMORY_LIMIT: 512M
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./config/php/php-uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+    networks:
+      - wordpress_network
+
+  nginx:
+    depends_on:
+      - wordpress
+    image: nginx:alpine
+    container_name: wordpress_nginx
+    restart: always
+    ports:
+      - "[::]:80:80"
+      - "[::]:443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - wordpress_data:/var/www/html:ro
+    networks:
+      - wordpress_network
+
+volumes:
+  db_data:
+  wordpress_data:
+
+networks:
+  wordpress_network:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: fd00:172:20::/48
+          gateway: fd00:172:20::1

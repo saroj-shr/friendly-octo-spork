@@ -1,0 +1,20 @@
+# Environment variables
+.env
+
+# WordPress volumes (if mounted locally)
+wordpress/
+
+# Database volumes (if mounted locally)
+mysql/
+
+# SSL certificates
+ssl/
+
+# Certbot
+certbot-www/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
