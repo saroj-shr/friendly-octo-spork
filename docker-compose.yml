@@ -3,6 +3,7 @@ services:
     image: mysql:8.0
     container_name: wordpress_db
     restart: always
+    command: --max_allowed_packet=512M
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: wordpress
